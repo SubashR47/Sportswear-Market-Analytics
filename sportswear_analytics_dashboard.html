@@ -1,0 +1,1418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>India Sportswear Analytics — Nike Intelligence Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --teal: #0F6E56;
+    --teal-light: #1D9E75;
+    --teal-xlight: #E1F5EE;
+    --orange: #D85A30;
+    --orange-light: #FAECE7;
+    --navy: #0A1628;
+    --navy-mid: #112240;
+    --slate: #1E3A5F;
+    --gold: #BA7517;
+    --gold-light: #FAEEDA;
+    --red: #A32D2D;
+    --red-light: #FCEBEB;
+    --green: #3B6D11;
+    --green-light: #EAF3DE;
+    --text-primary: #0A1628;
+    --text-secondary: #3a4a5e;
+    --text-muted: #6b7b8e;
+    --bg: #f4f6f9;
+    --card: #ffffff;
+    --border: #dde3ec;
+    --accent: #0F6E56;
+  }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text-primary);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--navy);
+    padding: 0;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    border-bottom: 2px solid var(--teal);
+  }
+  .header-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 64px;
+  }
+  .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.1rem;
+    font-weight: 800;
+    color: #fff;
+    letter-spacing: -0.02em;
+  }
+  .logo span { color: var(--teal-light); }
+  .badge-lpu {
+    font-size: 0.7rem;
+    background: rgba(255,255,255,0.1);
+    color: #9fb4c7;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: 0.05em;
+  }
+
+  /* ── NAV TABS ── */
+  nav {
+    background: var(--navy-mid);
+    border-bottom: 1px solid rgba(255,255,255,0.08);
+  }
+  .nav-inner {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 2rem;
+    display: flex;
+    gap: 0;
+    overflow-x: auto;
+  }
+  .nav-tab {
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: #7a95b0;
+    padding: 0.75rem 1.2rem;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    white-space: nowrap;
+    transition: color 0.2s, border-color 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .nav-tab:hover { color: #d0e8ff; }
+  .nav-tab.active { color: #fff; border-bottom-color: var(--teal-light); }
+
+  /* ── LAYOUT ── */
+  main {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 2rem;
+  }
+  .section { display: none; }
+  .section.active { display: block; }
+
+  /* ── PAGE TITLE ── */
+  .page-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: var(--navy);
+    margin-bottom: 0.3rem;
+    letter-spacing: -0.02em;
+  }
+  .page-sub {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── KPI CARDS ── */
+  .kpi-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .kpi-card {
+    background: var(--card);
+    border-radius: 12px;
+    padding: 1.2rem 1.4rem;
+    border: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+  .kpi-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+  }
+  .kpi-card.teal::before { background: var(--teal-light); }
+  .kpi-card.orange::before { background: var(--orange); }
+  .kpi-card.gold::before { background: var(--gold); }
+  .kpi-card.green::before { background: var(--green); }
+  .kpi-card.red::before { background: var(--red); }
+  .kpi-label {
+    font-size: 0.7rem;
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--text-muted);
+    margin-bottom: 0.5rem;
+  }
+  .kpi-value {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.8rem;
+    font-weight: 700;
+    color: var(--navy);
+    line-height: 1;
+    margin-bottom: 0.3rem;
+  }
+  .kpi-desc {
+    font-size: 0.72rem;
+    color: var(--text-muted);
+  }
+
+  /* ── CHART CARDS ── */
+  .chart-grid {
+    display: grid;
+    gap: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+  .chart-grid-2 { grid-template-columns: 1fr 1fr; }
+  .chart-grid-3 { grid-template-columns: 1fr 1fr 1fr; }
+  .chart-grid-1 { grid-template-columns: 1fr; }
+
+  .card {
+    background: var(--card);
+    border-radius: 14px;
+    border: 1px solid var(--border);
+    padding: 1.4rem;
+  }
+  .card-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--navy);
+    margin-bottom: 0.3rem;
+  }
+  .card-sub {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-bottom: 1rem;
+  }
+
+  /* ── INSIGHT TAGS ── */
+  .insight-row {
+    display: flex;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+    margin-top: 1rem;
+  }
+  .insight-tag {
+    font-size: 0.72rem;
+    padding: 5px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+  }
+  .insight-tag.info { background: #e6f1fb; color: #0C447C; }
+  .insight-tag.success { background: var(--green-light); color: var(--green); }
+  .insight-tag.warn { background: var(--gold-light); color: var(--gold); }
+  .insight-tag.danger { background: var(--red-light); color: var(--red); }
+
+  /* ── PRODUCT TABLE ── */
+  .product-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.82rem;
+  }
+  .product-table th {
+    background: #f0f4f8;
+    font-weight: 600;
+    text-align: left;
+    padding: 0.65rem 0.9rem;
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+  }
+  .product-table td {
+    padding: 0.7rem 0.9rem;
+    border-bottom: 1px solid #f0f4f8;
+    color: var(--text-secondary);
+    vertical-align: middle;
+  }
+  .product-table tr:last-child td { border-bottom: none; }
+  .product-table tr:hover td { background: #f9fbfc; }
+
+  .tier-badge {
+    font-size: 0.68rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 20px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .tier-scale { background: var(--green-light); color: var(--green); }
+  .tier-fix { background: var(--gold-light); color: var(--gold); }
+  .tier-drop { background: var(--red-light); color: var(--red); }
+  .tier-risk { background: #fff3e0; color: #e65100; }
+
+  .stars {
+    color: #F4B400;
+    font-size: 0.8rem;
+  }
+
+  /* ── FRAMEWORK CARDS ── */
+  .framework-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .fw-card {
+    border-radius: 12px;
+    padding: 1.4rem;
+    border-top: 4px solid;
+  }
+  .fw-card.scale { background: var(--green-light); border-color: var(--green); }
+  .fw-card.fix { background: var(--gold-light); border-color: var(--gold); }
+  .fw-card.drop { background: var(--red-light); border-color: var(--red); }
+  .fw-pct {
+    font-family: 'Syne', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 800;
+    line-height: 1;
+    margin-bottom: 0.4rem;
+  }
+  .fw-card.scale .fw-pct { color: var(--green); }
+  .fw-card.fix .fw-pct { color: var(--gold); }
+  .fw-card.drop .fw-pct { color: var(--red); }
+  .fw-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    margin-bottom: 0.6rem;
+  }
+  .fw-card.scale .fw-title { color: var(--green); }
+  .fw-card.fix .fw-title { color: var(--gold); }
+  .fw-card.drop .fw-title { color: var(--red); }
+  .fw-criteria {
+    font-size: 0.72rem;
+    font-weight: 600;
+    padding: 3px 8px;
+    border-radius: 4px;
+    display: inline-block;
+    margin-bottom: 0.8rem;
+    background: rgba(255,255,255,0.6);
+    color: var(--text-secondary);
+  }
+  .fw-list {
+    list-style: none;
+    font-size: 0.78rem;
+    color: var(--text-secondary);
+  }
+  .fw-list li {
+    padding: 3px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  .fw-list li::before { content: '›'; font-weight: 700; margin-top: 1px; }
+
+  /* ── KEYWORD BAR ── */
+  .keyword-bar {
+    margin-bottom: 0.7rem;
+  }
+  .kw-row {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    margin-bottom: 0.5rem;
+  }
+  .kw-label {
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+    width: 90px;
+    flex-shrink: 0;
+  }
+  .kw-track {
+    flex: 1;
+    height: 8px;
+    background: #eef0f3;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .kw-fill {
+    height: 100%;
+    border-radius: 4px;
+    transition: width 1s ease;
+  }
+  .kw-pct {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    width: 32px;
+    text-align: right;
+  }
+
+  /* ── RECOMMENDATIONS ── */
+  .rec-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+    margin-bottom: 1.2rem;
+  }
+  .rec-card {
+    border-radius: 12px;
+    padding: 1.3rem;
+    border: 1px solid var(--border);
+    background: var(--card);
+  }
+  .rec-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 0.8rem;
+  }
+  .rec-icon {
+    width: 32px; height: 32px;
+    border-radius: 8px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px;
+  }
+  .rec-icon.teal { background: var(--teal-xlight); color: var(--teal); }
+  .rec-icon.blue { background: #e6f1fb; color: #185FA5; }
+  .rec-icon.orange { background: var(--orange-light); color: var(--orange); }
+  .rec-icon.purple { background: #EEEDFE; color: #534AB7; }
+  .rec-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--navy);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .rec-list {
+    list-style: none;
+    font-size: 0.79rem;
+    color: var(--text-secondary);
+  }
+  .rec-list li {
+    padding: 4px 0;
+    display: flex;
+    align-items: flex-start;
+    gap: 6px;
+    border-bottom: 1px solid #f5f7fa;
+  }
+  .rec-list li:last-child { border-bottom: none; }
+  .rec-list li::before { content: '→'; color: var(--teal-light); font-weight: 700; margin-top: 1px; }
+
+  /* ── CORRELATION MATRIX ── */
+  .corr-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 3px;
+  }
+  .corr-cell {
+    aspect-ratio: 1;
+    border-radius: 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.75rem;
+  }
+  .corr-val {
+    font-family: 'Syne', sans-serif;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+  .corr-lbl {
+    font-size: 0.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    opacity: 0.7;
+  }
+
+  /* ── SCROLL TO TOP ── */
+  .scroll-top {
+    position: fixed;
+    bottom: 2rem;
+    right: 2rem;
+    background: var(--teal);
+    color: #fff;
+    border: none;
+    border-radius: 50%;
+    width: 44px; height: 44px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 4px 16px rgba(15,110,86,0.35);
+    transition: transform 0.2s;
+  }
+  .scroll-top:hover { transform: translateY(-3px); }
+
+  /* ── FOOTER ── */
+  footer {
+    background: var(--navy);
+    color: #6b8099;
+    text-align: center;
+    padding: 1.5rem;
+    font-size: 0.75rem;
+    margin-top: 3rem;
+  }
+  footer span { color: var(--teal-light); }
+
+  @media (max-width: 900px) {
+    .chart-grid-2, .chart-grid-3, .framework-grid, .rec-grid { grid-template-columns: 1fr; }
+    main { padding: 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-inner">
+    <div class="logo">India Sportswear <span>Intelligence</span></div>
+    <div style="display:flex;gap:0.7rem;align-items:center;">
+      <div class="badge-lpu">MGNM523 · LPU · Subash R</div>
+      <div class="badge-lpu">Nike India · 2024</div>
+    </div>
+  </div>
+</header>
+
+<nav>
+  <div class="nav-inner">
+    <div class="nav-tab active" onclick="switchTab('executive')">Executive Dashboard</div>
+    <div class="nav-tab" onclick="switchTab('market')">Market Performance</div>
+    <div class="nav-tab" onclick="switchTab('sentiment')">Sentiment & NLP</div>
+    <div class="nav-tab" onclick="switchTab('products')">Product Intelligence</div>
+    <div class="nav-tab" onclick="switchTab('trends')">Trend Analysis</div>
+    <div class="nav-tab" onclick="switchTab('strategy')">Strategy & Recommendations</div>
+  </div>
+</nav>
+
+<main>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 1 — EXECUTIVE DASHBOARD
+══════════════════════════════════════════════════════ -->
+<section id="tab-executive" class="section active">
+  <div class="page-title">Executive Intelligence Dashboard</div>
+  <div class="page-sub">Data-driven decision framework for Nike India's sportswear portfolio · 6,060 products analysed</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card teal">
+      <div class="kpi-label">Positive Sentiment</div>
+      <div class="kpi-value">68%</div>
+      <div class="kpi-desc">NLP across all product descriptions</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Nike Price Premium</div>
+      <div class="kpi-value">~46%</div>
+      <div class="kpi-desc">Above Adidas avg sale price</div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="kpi-label">Rating–Review Corr.</div>
+      <div class="kpi-value">r=0.42</div>
+      <div class="kpi-desc">Better-rated → more engagement</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Scale-Ready Products</div>
+      <div class="kpi-value">42%</div>
+      <div class="kpi-desc">Rating ≥4.0 + positive sentiment</div>
+    </div>
+    <div class="kpi-card red">
+      <div class="kpi-label">Drop Candidates</div>
+      <div class="kpi-value">13%</div>
+      <div class="kpi-desc">Rating &lt;3.0 — portfolio inefficiency</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">Fix Tier Products</div>
+      <div class="kpi-value">45%</div>
+      <div class="kpi-desc">Rating 3.0–3.9 · high upgrade potential</div>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-2">
+    <div class="card">
+      <div class="card-title">Portfolio Strategy Distribution</div>
+      <div class="card-sub">Scale / Fix / Drop breakdown</div>
+      <div style="position:relative;height:240px;">
+        <canvas id="portfolioDonut" role="img" aria-label="Portfolio distribution: 42% Scale, 45% Fix, 13% Drop"></canvas>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:#6b7b8e;flex-wrap:wrap;">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#3B6D11;"></span>Scale 42%</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#BA7517;"></span>Fix 45%</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#A32D2D;"></span>Drop 13%</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Sentiment Distribution</div>
+      <div class="card-sub">Voice of customer — NLP analysis</div>
+      <div style="position:relative;height:240px;">
+        <canvas id="sentimentDonut" role="img" aria-label="Sentiment: 68% positive, 22% neutral, 10% negative"></canvas>
+      </div>
+      <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;color:#6b7b8e;flex-wrap:wrap;">
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#1D9E75;"></span>Positive 68%</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#888780;"></span>Neutral 22%</span>
+        <span style="display:flex;align-items:center;gap:4px;"><span style="width:10px;height:10px;border-radius:2px;background:#D85A30;"></span>Negative 10%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-1">
+    <div class="card">
+      <div class="card-title">Key Business Findings</div>
+      <div class="card-sub">Evidence-backed strategic intelligence</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:0.5rem;">
+        <div style="padding:1rem;background:#f0f9f5;border-radius:10px;border-left:3px solid var(--teal-light);">
+          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--teal);margin-bottom:0.4rem;">✓ Premium Paradox</div>
+          <div style="font-size:0.8rem;color:var(--text-secondary);">Price-to-rating correlation is near zero (r≈0.08). Higher price does not drive customer satisfaction in India's sportswear market.</div>
+        </div>
+        <div style="padding:1rem;background:#f0f9f5;border-radius:10px;border-left:3px solid var(--teal-light);">
+          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--teal);margin-bottom:0.4rem;">✓ Engagement Driver</div>
+          <div style="font-size:0.8rem;color:var(--text-secondary);">Ratings strongly predict review volume (r=0.42). Investing in quality improvements directly amplifies organic engagement.</div>
+        </div>
+        <div style="padding:1rem;background:#fef9ec;border-radius:10px;border-left:3px solid var(--gold);">
+          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gold);margin-bottom:0.4rem;">! Fix Opportunity</div>
+          <div style="font-size:0.8rem;color:var(--text-secondary);">45% of products sit in Fix tier. Targeted quality + pricing adjustments could shift many into Scale category, unlocking significant growth.</div>
+        </div>
+        <div style="padding:1rem;background:#fef9ec;border-radius:10px;border-left:3px solid var(--gold);">
+          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gold);margin-bottom:0.4rem;">! Consumer Drivers</div>
+          <div style="font-size:0.8rem;color:var(--text-secondary);">Comfort (92%), Lightweight (85%), Performance (78%) are top purchase triggers. Functional attributes outperform aesthetics decisively.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 2 — MARKET PERFORMANCE
+══════════════════════════════════════════════════════ -->
+<section id="tab-market" class="section">
+  <div class="page-title">Market Performance Analysis</div>
+  <div class="page-sub">Brand positioning, pricing landscape, and category engagement across 6,060 products</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card orange">
+      <div class="kpi-label">Nike Avg Sale Price</div>
+      <div class="kpi-value">$95</div>
+      <div class="kpi-desc">vs Adidas $65 avg</div>
+    </div>
+    <div class="kpi-card teal">
+      <div class="kpi-label">Adidas Avg Sale Price</div>
+      <div class="kpi-value">$65</div>
+      <div class="kpi-desc">More volume-competitive</div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="kpi-label">Total Products Analysed</div>
+      <div class="kpi-value">6,060</div>
+      <div class="kpi-desc">3,030 Nike · 3,030 Adidas</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Sweet Spot Pricing</div>
+      <div class="kpi-value">$50–100</div>
+      <div class="kpi-desc">Highest volume & satisfaction band</div>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-2">
+    <div class="card">
+      <div class="card-title">Average Sale Price by Brand</div>
+      <div class="card-sub">Nike commands a 46% premium over Adidas</div>
+      <div style="position:relative;height:260px;">
+        <canvas id="brandPriceChart" role="img" aria-label="Nike avg $95 vs Adidas avg $65"></canvas>
+      </div>
+      <div class="insight-row">
+        <span class="insight-tag warn">Nike 46% premium</span>
+        <span class="insight-tag info">Mid-premium dominates</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Price Band Distribution</div>
+      <div class="card-sub">Product count across pricing tiers</div>
+      <div style="position:relative;height:260px;">
+        <canvas id="priceBandChart" role="img" aria-label="Price band distribution across ranges"></canvas>
+      </div>
+      <div class="insight-row">
+        <span class="insight-tag success">$50–100 is dominant</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-2">
+    <div class="card">
+      <div class="card-title">Category Engagement — Review Volume</div>
+      <div class="card-sub">Training & running drive maximum engagement</div>
+      <div style="position:relative;height:280px;">
+        <canvas id="categoryEngChart" role="img" aria-label="Category review counts by segment"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Rating Distribution by Category</div>
+      <div class="card-sub">Average customer ratings per product category</div>
+      <div style="position:relative;height:280px;">
+        <canvas id="categoryRatingChart" role="img" aria-label="Average ratings by category"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-1">
+    <div class="card">
+      <div class="card-title">Indian Consumer Buying Behaviour — Key Insights</div>
+      <div class="card-sub">3 data-backed behavioural patterns</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1rem;margin-top:0.5rem;">
+        <div style="text-align:center;padding:1.2rem;background:#f8fafb;border-radius:10px;">
+          <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--teal-light);">1</div>
+          <div style="font-size:0.8rem;font-weight:600;color:var(--navy);margin:0.4rem 0 0.3rem;">Function Over Fashion</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Performance attributes drive 78%+ of positive responses. Style ranks lower.</div>
+        </div>
+        <div style="text-align:center;padding:1.2rem;background:#f8fafb;border-radius:10px;">
+          <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--teal-light);">2</div>
+          <div style="font-size:0.8rem;font-weight:600;color:var(--navy);margin:0.4rem 0 0.3rem;">Value Sensitivity</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Premium pricing without quality proof points creates satisfaction gaps and return risk.</div>
+        </div>
+        <div style="text-align:center;padding:1.2rem;background:#f8fafb;border-radius:10px;">
+          <div style="font-family:'Syne',sans-serif;font-size:2rem;font-weight:800;color:var(--teal-light);">3</div>
+          <div style="font-size:0.8rem;font-weight:600;color:var(--navy);margin:0.4rem 0 0.3rem;">Training-Led Growth</div>
+          <div style="font-size:0.72rem;color:var(--text-muted);">Running & training categories have highest ratings + engagement. Active fitness is India's primary sport segment.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 3 — SENTIMENT & NLP
+══════════════════════════════════════════════════════ -->
+<section id="tab-sentiment" class="section">
+  <div class="page-title">Customer Sentiment & NLP Analysis</div>
+  <div class="page-sub">Voice-of-customer decoded through TextBlob NLP and keyword frequency analysis</div>
+
+  <div class="chart-grid chart-grid-2">
+    <div class="card">
+      <div class="card-title">Top Consumer Keywords</div>
+      <div class="card-sub">Relative frequency in product descriptions</div>
+
+      <div class="keyword-bar">
+        <div class="kw-row"><div class="kw-label">Comfort</div><div class="kw-track"><div class="kw-fill" style="width:92%;background:#1D9E75;"></div></div><div class="kw-pct">92%</div></div>
+        <div class="kw-row"><div class="kw-label">Lightweight</div><div class="kw-track"><div class="kw-fill" style="width:85%;background:#0F6E56;"></div></div><div class="kw-pct">85%</div></div>
+        <div class="kw-row"><div class="kw-label">Performance</div><div class="kw-track"><div class="kw-fill" style="width:78%;background:#D85A30;"></div></div><div class="kw-pct">78%</div></div>
+        <div class="kw-row"><div class="kw-label">Breathable</div><div class="kw-track"><div class="kw-fill" style="width:71%;background:#185FA5;"></div></div><div class="kw-pct">71%</div></div>
+        <div class="kw-row"><div class="kw-label">Support</div><div class="kw-track"><div class="kw-fill" style="width:65%;background:#534AB7;"></div></div><div class="kw-pct">65%</div></div>
+        <div class="kw-row"><div class="kw-label">Cushion</div><div class="kw-track"><div class="kw-fill" style="width:58%;background:#BA7517;"></div></div><div class="kw-pct">58%</div></div>
+        <div class="kw-row"><div class="kw-label">Durable</div><div class="kw-track"><div class="kw-fill" style="width:52%;background:#639922;"></div></div><div class="kw-pct">52%</div></div>
+        <div class="kw-row"><div class="kw-label">Stylish</div><div class="kw-track"><div class="kw-fill" style="width:44%;background:#888780;"></div></div><div class="kw-pct">44%</div></div>
+      </div>
+
+      <div class="insight-row">
+        <span class="insight-tag success">Functional &gt; Aesthetic</span>
+        <span class="insight-tag info">Comfort is #1 driver</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Sentiment Segmentation</div>
+      <div class="card-sub">NLP polarity classification across portfolio</div>
+      <div style="position:relative;height:260px;">
+        <canvas id="sentimentBar" role="img" aria-label="Positive 68, Neutral 22, Negative 10 percent"></canvas>
+      </div>
+      <div style="margin-top:1rem;padding:0.9rem;background:#f0f9f5;border-radius:10px;border-left:3px solid var(--teal-light);">
+        <div style="font-size:0.72rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--teal);margin-bottom:0.3rem;">Voice of Customer Summary</div>
+        <div style="font-size:0.78rem;color:var(--text-secondary);line-height:1.5;">Customers consistently prioritise comfort, lightweight construction, breathability and athletic performance. Premium products sustain strong satisfaction, but value perception and pricing sensitivity remain key loyalty moderators.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-2">
+    <div class="card">
+      <div class="card-title">Positive Theme Analysis</div>
+      <div class="card-sub">Top 10 appreciation factors by frequency</div>
+      <div style="position:relative;height:300px;">
+        <canvas id="posThemeChart" role="img" aria-label="Top positive themes in customer descriptions"></canvas>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Expectation vs Experience Gap</div>
+      <div class="card-sub">Where the brand meets and misses expectations</div>
+      <div style="margin-top:0.5rem;">
+        <div style="display:grid;gap:0.6rem;">
+          <div style="background:var(--green-light);border-radius:8px;padding:0.8rem;">
+            <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--green);margin-bottom:0.3rem;">✓ Expectation Met</div>
+            <div style="font-size:0.78rem;color:var(--text-secondary);">Comfort & fit — overwhelmingly positive across all categories. Especially in running shoes (Air Max, Pegasus).</div>
+          </div>
+          <div style="background:var(--green-light);border-radius:8px;padding:0.8rem;">
+            <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--green);margin-bottom:0.3rem;">✓ Expectation Met</div>
+            <div style="font-size:0.78rem;color:var(--text-secondary);">Breathability in training apparel consistently praised in both high and mid-tier segments.</div>
+          </div>
+          <div style="background:var(--gold-light);border-radius:8px;padding:0.8rem;">
+            <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--gold);margin-bottom:0.3rem;">⚠ Partial Gap</div>
+            <div style="font-size:0.78rem;color:var(--text-secondary);">Durability — positive expectations but some products flag premature wear. Mid-tier shoes most affected.</div>
+          </div>
+          <div style="background:var(--red-light);border-radius:8px;padding:0.8rem;">
+            <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--red);margin-bottom:0.3rem;">✗ Expectation Gap</div>
+            <div style="font-size:0.78rem;color:var(--text-secondary);">Value for money — premium priced items (&gt;$120) with negative sentiment polarity signal high return risk and brand equity drag.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 4 — PRODUCT INTELLIGENCE
+══════════════════════════════════════════════════════ -->
+<section id="tab-products" class="section">
+  <div class="page-title">Product Intelligence Dashboard</div>
+  <div class="page-sub">Identifying stars, risks, and underperformers · Success Score = 70% Rating + 30% Normalised Reviews</div>
+
+  <div class="chart-grid chart-grid-1">
+    <div class="card">
+      <div class="card-title">Top 5 Products — Scale Tier</div>
+      <div class="card-sub">Highest composite success scores — recommend for marketing amplification & cross-sell bundling</div>
+      <div style="overflow-x:auto;">
+        <table class="product-table">
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Product</th>
+              <th>Category</th>
+              <th>Avg Rating</th>
+              <th>Reviews</th>
+              <th>Sentiment</th>
+              <th>Success Score</th>
+              <th>Tier</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><strong>#1</strong></td>
+              <td><strong>Nike Air Max 270</strong></td>
+              <td>Running / Lifestyle</td>
+              <td><span class="stars">★★★★★</span> 4.7</td>
+              <td>12,400</td>
+              <td style="color:var(--green);">+0.68 Positive</td>
+              <td><strong>92.4</strong></td>
+              <td><span class="tier-badge tier-scale">SCALE</span></td>
+            </tr>
+            <tr>
+              <td><strong>#2</strong></td>
+              <td><strong>Nike React Infinity Run</strong></td>
+              <td>Running</td>
+              <td><span class="stars">★★★★★</span> 4.6</td>
+              <td>9,800</td>
+              <td style="color:var(--green);">+0.62 Positive</td>
+              <td><strong>89.1</strong></td>
+              <td><span class="tier-badge tier-scale">SCALE</span></td>
+            </tr>
+            <tr>
+              <td><strong>#3</strong></td>
+              <td><strong>Nike Free RN 5.0</strong></td>
+              <td>Running</td>
+              <td><span class="stars">★★★★½</span> 4.5</td>
+              <td>8,200</td>
+              <td style="color:var(--green);">+0.58 Positive</td>
+              <td><strong>86.8</strong></td>
+              <td><span class="tier-badge tier-scale">SCALE</span></td>
+            </tr>
+            <tr>
+              <td><strong>#4</strong></td>
+              <td><strong>Nike Pegasus 38</strong></td>
+              <td>Running</td>
+              <td><span class="stars">★★★★½</span> 4.4</td>
+              <td>7,600</td>
+              <td style="color:var(--green);">+0.55 Positive</td>
+              <td><strong>84.3</strong></td>
+              <td><span class="tier-badge tier-scale">SCALE</span></td>
+            </tr>
+            <tr>
+              <td><strong>#5</strong></td>
+              <td><strong>Nike Zoom Fly 4</strong></td>
+              <td>Running / Racing</td>
+              <td><span class="stars">★★★★½</span> 4.3</td>
+              <td>6,900</td>
+              <td style="color:var(--green);">+0.51 Positive</td>
+              <td><strong>82.7</strong></td>
+              <td><span class="tier-badge tier-scale">SCALE</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-2">
+    <div class="card">
+      <div class="card-title">Risk Product Indicators</div>
+      <div class="card-sub">High price + negative sentiment = elevated return risk</div>
+      <div style="display:grid;gap:0.6rem;margin-top:0.5rem;">
+        <div style="display:flex;align-items:center;gap:10px;padding:0.8rem;background:#fff3e0;border-radius:8px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:#ffe0b2;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">⚠</div>
+          <div><div style="font-size:0.78rem;font-weight:600;color:#e65100;">Above-Average Price + Negative Sentiment</div><div style="font-size:0.72rem;color:var(--text-muted);">Price > portfolio avg AND sentiment score &lt; 0 — hidden dissatisfaction</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:0.8rem;background:#fff3e0;border-radius:8px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:#ffe0b2;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">📦</div>
+          <div><div style="font-size:0.78rem;font-weight:600;color:#e65100;">Elevated Return Risk</div><div style="font-size:0.72rem;color:var(--text-muted);">Consistent negative reviews on premium items increase return/refund volume</div></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:0.8rem;background:#fff3e0;border-radius:8px;">
+          <div style="width:36px;height:36px;border-radius:50%;background:#ffe0b2;display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0;">🏷</div>
+          <div><div style="font-size:0.78rem;font-weight:600;color:#e65100;">Brand Equity Drag</div><div style="font-size:0.72rem;color:var(--text-muted);">Risk products sitting in catalogue damage overall brand perception scores</div></div>
+        </div>
+      </div>
+      <div style="margin-top:0.8rem;padding:0.8rem;background:#fef9ec;border-radius:8px;font-size:0.75rem;color:var(--text-secondary);">
+        <strong>Action:</strong> FIX / REVIEW — revise descriptions, address quality issues, A/B test pricing, respond to reviews within 48 hrs.
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Bottom Tier Characteristics</div>
+      <div class="card-sub">Products flagged for discontinuation</div>
+      <div style="position:relative;height:200px;">
+        <canvas id="bottomTierChart" role="img" aria-label="Bottom tier product characteristics by metric"></canvas>
+      </div>
+      <div style="display:grid;gap:0.5rem;margin-top:0.8rem;">
+        <div style="padding:0.6rem 0.9rem;background:var(--red-light);border-radius:6px;font-size:0.75rem;color:var(--red);">Avg Rating &lt; 3.0 — far below portfolio threshold</div>
+        <div style="padding:0.6rem 0.9rem;background:var(--red-light);border-radius:6px;font-size:0.75rem;color:var(--red);">Minimal review engagement — weak consumer awareness</div>
+        <div style="padding:0.6rem 0.9rem;background:var(--red-light);border-radius:6px;font-size:0.75rem;color:var(--red);">Low composite success score — portfolio inefficiency drag</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-1">
+    <div class="card">
+      <div class="card-title">Product Success Score Distribution</div>
+      <div class="card-sub">Score = 70% × Rating + 30% × Normalised Reviews — higher = stronger market position</div>
+      <div style="position:relative;height:280px;">
+        <canvas id="successScoreChart" role="img" aria-label="Success score distribution across product portfolio"></canvas>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 5 — TREND ANALYSIS
+══════════════════════════════════════════════════════ -->
+<section id="tab-trends" class="section">
+  <div class="page-title">Correlation & Trend Analysis</div>
+  <div class="page-sub">How price, rating, sentiment and engagement inter-relate — statistically supported relationships</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card teal" style="grid-column:span 1;">
+      <div class="kpi-label">Price → Rating</div>
+      <div class="kpi-value">r≈0.08</div>
+      <div class="kpi-desc">Near zero — premium pricing does NOT guarantee satisfaction</div>
+    </div>
+    <div class="kpi-card gold">
+      <div class="kpi-label">Rating → Reviews</div>
+      <div class="kpi-value">r=0.42</div>
+      <div class="kpi-desc">Moderate-strong — better rated products attract more engagement</div>
+    </div>
+    <div class="kpi-card orange">
+      <div class="kpi-label">Sentiment → Rating</div>
+      <div class="kpi-value">r=0.38</div>
+      <div class="kpi-desc">Meaningful — positive language correlates with higher ratings</div>
+    </div>
+    <div class="kpi-card green">
+      <div class="kpi-label">Price → Reviews</div>
+      <div class="kpi-value">r=-0.05</div>
+      <div class="kpi-desc">Negligible negative — price does not drive review volume</div>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-2">
+    <div class="card">
+      <div class="card-title">Correlation Matrix</div>
+      <div class="card-sub">All variable pair relationships</div>
+      <div style="margin-top:0.8rem;">
+        <div style="display:grid;grid-template-columns:80px repeat(4,1fr);gap:3px;font-size:0.65rem;text-align:center;">
+          <div></div>
+          <div style="font-weight:600;padding:6px;color:var(--text-muted);">Price</div>
+          <div style="font-weight:600;padding:6px;color:var(--text-muted);">Rating</div>
+          <div style="font-weight:600;padding:6px;color:var(--text-muted);">Reviews</div>
+          <div style="font-weight:600;padding:6px;color:var(--text-muted);">Sentiment</div>
+
+          <div style="font-weight:600;text-align:right;padding:6px 8px;color:var(--text-muted);display:flex;align-items:center;justify-content:flex-end;">Price</div>
+          <div style="background:#c0392b;border-radius:6px;padding:8px;color:#fff;font-weight:700;font-size:0.8rem;">1.00</div>
+          <div style="background:#f5c6c6;border-radius:6px;padding:8px;color:#7a1e1e;font-weight:700;font-size:0.8rem;">0.08</div>
+          <div style="background:#fdeaea;border-radius:6px;padding:8px;color:#a32d2d;font-weight:700;font-size:0.8rem;">-0.05</div>
+          <div style="background:#fdeaea;border-radius:6px;padding:8px;color:#a32d2d;font-weight:700;font-size:0.8rem;">0.03</div>
+
+          <div style="font-weight:600;text-align:right;padding:6px 8px;color:var(--text-muted);display:flex;align-items:center;justify-content:flex-end;">Rating</div>
+          <div style="background:#f5c6c6;border-radius:6px;padding:8px;color:#7a1e1e;font-weight:700;font-size:0.8rem;">0.08</div>
+          <div style="background:#c0392b;border-radius:6px;padding:8px;color:#fff;font-weight:700;font-size:0.8rem;">1.00</div>
+          <div style="background:#e8b4b4;border-radius:6px;padding:8px;color:#6b1a1a;font-weight:700;font-size:0.8rem;">0.42</div>
+          <div style="background:#edbdbd;border-radius:6px;padding:8px;color:#6b1a1a;font-weight:700;font-size:0.8rem;">0.38</div>
+
+          <div style="font-weight:600;text-align:right;padding:6px 8px;color:var(--text-muted);display:flex;align-items:center;justify-content:flex-end;">Reviews</div>
+          <div style="background:#fdeaea;border-radius:6px;padding:8px;color:#a32d2d;font-weight:700;font-size:0.8rem;">-0.05</div>
+          <div style="background:#e8b4b4;border-radius:6px;padding:8px;color:#6b1a1a;font-weight:700;font-size:0.8rem;">0.42</div>
+          <div style="background:#c0392b;border-radius:6px;padding:8px;color:#fff;font-weight:700;font-size:0.8rem;">1.00</div>
+          <div style="background:#f2cece;border-radius:6px;padding:8px;color:#7a1e1e;font-weight:700;font-size:0.8rem;">0.21</div>
+
+          <div style="font-weight:600;text-align:right;padding:6px 8px;color:var(--text-muted);display:flex;align-items:center;justify-content:flex-end;">Sentiment</div>
+          <div style="background:#fdeaea;border-radius:6px;padding:8px;color:#a32d2d;font-weight:700;font-size:0.8rem;">0.03</div>
+          <div style="background:#edbdbd;border-radius:6px;padding:8px;color:#6b1a1a;font-weight:700;font-size:0.8rem;">0.38</div>
+          <div style="background:#f2cece;border-radius:6px;padding:8px;color:#7a1e1e;font-weight:700;font-size:0.8rem;">0.21</div>
+          <div style="background:#c0392b;border-radius:6px;padding:8px;color:#fff;font-weight:700;font-size:0.8rem;">1.00</div>
+        </div>
+      </div>
+      <div class="insight-row">
+        <span class="insight-tag danger">Price → Rating: negligible</span>
+        <span class="insight-tag warn">Rating → Reviews: moderate</span>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Key Purchase Decision Drivers</div>
+      <div class="card-sub">Ranked by statistical influence on customer satisfaction</div>
+      <div style="position:relative;height:280px;">
+        <canvas id="driversChart" role="img" aria-label="Purchase decision drivers ranked by influence score"></canvas>
+      </div>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-1">
+    <div class="card">
+      <div class="card-title">Statistically Supported Relationships — Summary</div>
+      <div class="card-sub">5 evidence-backed findings with business interpretation</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem;margin-top:0.5rem;">
+        <div style="padding:0.9rem;border:1px solid var(--border);border-radius:10px;">
+          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.3rem;">Finding 1</div>
+          <div style="font-size:0.82rem;font-weight:600;color:var(--navy);margin-bottom:0.3rem;">Price does not drive satisfaction</div>
+          <div style="font-size:0.75rem;color:var(--text-secondary);">r≈0.08 between price and rating. Customers judge value, not just price. Implication: quality must justify premium.</div>
+        </div>
+        <div style="padding:0.9rem;border:1px solid var(--border);border-radius:10px;">
+          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.3rem;">Finding 2</div>
+          <div style="font-size:0.82rem;font-weight:600;color:var(--navy);margin-bottom:0.3rem;">Quality unlocks organic growth</div>
+          <div style="font-size:0.75rem;color:var(--text-secondary);">r=0.42 between rating and reviews. 1pt rating increase drives ~42% more review engagement — a direct marketing multiplier.</div>
+        </div>
+        <div style="padding:0.9rem;border:1px solid var(--border);border-radius:10px;">
+          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.3rem;">Finding 3</div>
+          <div style="font-size:0.82rem;font-weight:600;color:var(--navy);margin-bottom:0.3rem;">Messaging drives perception</div>
+          <div style="font-size:0.75rem;color:var(--text-secondary);">r=0.38 sentiment-to-rating. Products with comfort/lightweight emphasis in descriptions consistently rate higher.</div>
+        </div>
+        <div style="padding:0.9rem;border:1px solid var(--border);border-radius:10px;">
+          <div style="font-size:0.7rem;font-weight:600;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-muted);margin-bottom:0.3rem;">Finding 4</div>
+          <div style="font-size:0.82rem;font-weight:600;color:var(--navy);margin-bottom:0.3rem;">Mid-premium is the sweet spot</div>
+          <div style="font-size:0.75rem;color:var(--text-secondary);">$50–$90 price range maximises both volume and satisfaction. Premium (&gt;$120) creates value perception challenges without quality signals.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ══════════════════════════════════════════════════════
+     TAB 6 — STRATEGY & RECOMMENDATIONS
+══════════════════════════════════════════════════════ -->
+<section id="tab-strategy" class="section">
+  <div class="page-title">Strategic Recommendations</div>
+  <div class="page-sub">Four-pillar action framework for Nike India's sportswear portfolio</div>
+
+  <div class="framework-grid">
+    <div class="fw-card scale">
+      <div class="fw-pct">42%</div>
+      <div class="fw-title">Scale</div>
+      <div class="fw-criteria">Rating ≥ 4.0 + Positive Sentiment</div>
+      <ul class="fw-list">
+        <li>Increase marketing spend on top performers</li>
+        <li>Expand inventory for Air Max, React, Pegasus lines</li>
+        <li>Prioritise in search & discovery algorithms</li>
+        <li>Bundle Scale products with Fix tier to lift AOV</li>
+        <li>Protect gross margin — reduce discounting</li>
+      </ul>
+    </div>
+    <div class="fw-card fix">
+      <div class="fw-pct">45%</div>
+      <div class="fw-title">Fix</div>
+      <div class="fw-criteria">Rating 3.0 – 3.9</div>
+      <ul class="fw-list">
+        <li>Revise product descriptions — amplify comfort/lightweight</li>
+        <li>Address quality feedback in next production run</li>
+        <li>Re-evaluate pricing against category averages</li>
+        <li>A/B test positioning and headline messaging</li>
+        <li>Respond to negative reviews within 48 hours</li>
+      </ul>
+    </div>
+    <div class="fw-card drop">
+      <div class="fw-pct">13%</div>
+      <div class="fw-title">Drop</div>
+      <div class="fw-criteria">Rating &lt; 3.0</div>
+      <ul class="fw-list">
+        <li>Phase out listings to protect brand equity</li>
+        <li>Liquidate remaining inventory via outlet channels</li>
+        <li>Reallocate resources to Scale tier products</li>
+        <li>Use failure learnings for future NPD briefs</li>
+        <li>Avoid discounting — doesn't fix satisfaction gaps</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="rec-grid">
+    <div class="rec-card">
+      <div class="rec-header">
+        <div class="rec-icon teal">📦</div>
+        <div class="rec-title">Product Strategy</div>
+      </div>
+      <ul class="rec-list">
+        <li>Scale 42% high-rating + positive sentiment products immediately</li>
+        <li>Fix mid-tier SKUs via description revision and pricing tests</li>
+        <li>Drop bottom 13% — protect brand rating, free team resources</li>
+        <li>Build new products around comfort + lightweight + breathability as non-negotiables</li>
+        <li>Expand training & running category — highest-rated segments</li>
+      </ul>
+    </div>
+
+    <div class="rec-card">
+      <div class="rec-header">
+        <div class="rec-icon blue">💰</div>
+        <div class="rec-title">Pricing Strategy</div>
+      </div>
+      <ul class="rec-list">
+        <li>Avoid premium pricing without clear quality proof points</li>
+        <li>Mid-premium $50–$90 range optimises both volume and satisfaction</li>
+        <li>Reduce discounting on Scale products — protect gross margin</li>
+        <li>Price testing on Fix tier — some may unlock Scale with minor adjustments</li>
+        <li>Monitor competitive pricing vs Adidas monthly</li>
+      </ul>
+    </div>
+
+    <div class="rec-card">
+      <div class="rec-header">
+        <div class="rec-icon orange">💬</div>
+        <div class="rec-title">Customer Strategy</div>
+      </div>
+      <ul class="rec-list">
+        <li>Amplify comfort, lightweight, and breathability messaging across all touchpoints</li>
+        <li>Respond to negative reviews on Risk products within 48 hours</li>
+        <li>Use sentiment data to guide product description rewrites</li>
+        <li>Build a review generation programme for high-rated but low-review products</li>
+        <li>Highlight Indian athlete testimonials in comfort-focused categories</li>
+      </ul>
+    </div>
+
+    <div class="rec-card">
+      <div class="rec-header">
+        <div class="rec-icon purple">🌏</div>
+        <div class="rec-title">Market Positioning</div>
+      </div>
+      <ul class="rec-list">
+        <li>Invest in Top 5 products by composite success score for future campaigns</li>
+        <li>Position Nike as performance-first, not premium-price-first in India</li>
+        <li>Target India's fitness boom — running, training, yoga segments growing fastest</li>
+        <li>Develop Indian-market specific SKUs (heat, humidity, durability-optimised)</li>
+        <li>Monitor Puma, Reebok, and emerging Indian brands for competitive signals</li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="chart-grid chart-grid-1">
+    <div class="card">
+      <div class="card-title">Future Scope & Technology Roadmap</div>
+      <div class="card-sub">Next phases to build on this analysis</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:0.8rem;margin-top:0.5rem;">
+        <div style="text-align:center;padding:1rem;background:#f8fafb;border-radius:10px;border-top:3px solid var(--teal-light);">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">📡</div>
+          <div style="font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.3rem;">Live Review NLP</div>
+          <div style="font-size:0.7rem;color:var(--text-muted);">Integrate real-time customer review text for richer, more accurate sentiment signals</div>
+        </div>
+        <div style="text-align:center;padding:1rem;background:#f8fafb;border-radius:10px;border-top:3px solid var(--gold);">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">🏋️</div>
+          <div style="font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.3rem;">Expand Brands</div>
+          <div style="font-size:0.7rem;color:var(--text-muted);">Add Puma, Reebok, Decathlon and emerging Indian sportswear brands to competitive set</div>
+        </div>
+        <div style="text-align:center;padding:1rem;background:#f8fafb;border-radius:10px;border-top:3px solid var(--orange);">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">📊</div>
+          <div style="font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.3rem;">Real-Time Dashboard</div>
+          <div style="font-size:0.7rem;color:var(--text-muted);">Build dynamic success scoring dashboard with live product feed and automated alerts</div>
+        </div>
+        <div style="text-align:center;padding:1rem;background:#f8fafb;border-radius:10px;border-top:3px solid #534AB7;">
+          <div style="font-size:1.5rem;margin-bottom:0.5rem;">🤖</div>
+          <div style="font-size:0.78rem;font-weight:600;color:var(--navy);margin-bottom:0.3rem;">ML Classification</div>
+          <div style="font-size:0.7rem;color:var(--text-muted);">Apply ML models for automated Scale/Fix/Drop tagging as new products are listed</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</main>
+
+<button class="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})" title="Back to top">↑</button>
+
+<footer>
+  <strong style="color:#fff;">India Sportswear Analytics Dashboard</strong> &nbsp;·&nbsp;
+  Student: <span>Subash R — 12500554</span> &nbsp;·&nbsp;
+  Course: <span>MGNM523 — Business Applications of AI</span> &nbsp;·&nbsp;
+  Faculty: <span>Dr. Arun Khatri</span> &nbsp;·&nbsp;
+  <span>Lovely Professional University</span>
+</footer>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  const tabs = ['executive','market','sentiment','products','trends','strategy'];
+  document.querySelectorAll('.nav-tab')[tabs.indexOf(id)].classList.add('active');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+const TEAL = '#1D9E75';
+const NAVY = '#0A1628';
+const ORANGE = '#D85A30';
+const GOLD = '#BA7517';
+const GREEN = '#3B6D11';
+const RED = '#A32D2D';
+const BLUE = '#185FA5';
+const GRAY = '#888780';
+const PURPLE = '#534AB7';
+
+Chart.defaults.font.family = "'DM Sans', sans-serif";
+Chart.defaults.color = '#6b7b8e';
+
+function makeChart(id, config) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  new Chart(el, config);
+}
+
+makeChart('portfolioDonut', {
+  type: 'doughnut',
+  data: {
+    labels: ['Scale (42%)', 'Fix (45%)', 'Drop (13%)'],
+    datasets: [{
+      data: [42, 45, 13],
+      backgroundColor: [GREEN, GOLD, RED],
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } } },
+    cutout: '65%'
+  }
+});
+
+makeChart('sentimentDonut', {
+  type: 'doughnut',
+  data: {
+    labels: ['Positive (68%)', 'Neutral (22%)', 'Negative (10%)'],
+    datasets: [{
+      data: [68, 22, 10],
+      backgroundColor: [TEAL, GRAY, ORANGE],
+      borderWidth: 2,
+      borderColor: '#fff'
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ` ${ctx.label}: ${ctx.raw}%` } } },
+    cutout: '65%'
+  }
+});
+
+makeChart('brandPriceChart', {
+  type: 'bar',
+  data: {
+    labels: ['Adidas', 'Nike'],
+    datasets: [{
+      label: 'Avg Sale Price (USD)',
+      data: [65, 95],
+      backgroundColor: [TEAL, NAVY],
+      borderRadius: 8,
+      borderSkipped: false
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, max: 110, ticks: { callback: v => '$' + v } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+makeChart('priceBandChart', {
+  type: 'bar',
+  data: {
+    labels: ['<$25', '$25–50', '$50–75', '$75–100', '$100–150', '>$150'],
+    datasets: [
+      { label: 'Nike', data: [180, 520, 980, 820, 380, 150], backgroundColor: NAVY, borderRadius: 4 },
+      { label: 'Adidas', data: [320, 680, 1100, 540, 280, 110], backgroundColor: TEAL, borderRadius: 4 }
+    ]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { grid: { display: false } }, y: { stacked: false } }
+  }
+});
+
+makeChart('categoryEngChart', {
+  type: 'bar',
+  data: {
+    labels: ['Running', 'Training', 'Basketball', 'Lifestyle', 'Soccer', 'Yoga'],
+    datasets: [{
+      label: 'Avg Reviews',
+      data: [8900, 7200, 4800, 3600, 2900, 1800],
+      backgroundColor: [TEAL, TEAL, BLUE, GOLD, ORANGE, PURPLE],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: { x: { grid: { display: true } }, y: { grid: { display: false } } }
+  }
+});
+
+makeChart('categoryRatingChart', {
+  type: 'bar',
+  data: {
+    labels: ['Running', 'Training', 'Yoga', 'Basketball', 'Lifestyle', 'Soccer'],
+    datasets: [{
+      label: 'Avg Rating',
+      data: [4.4, 4.2, 4.0, 3.8, 3.6, 3.4],
+      backgroundColor: [GREEN, GREEN, TEAL, GOLD, ORANGE, RED],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { min: 2.5, max: 5.0, ticks: { callback: v => v.toFixed(1) + '★' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+makeChart('sentimentBar', {
+  type: 'bar',
+  data: {
+    labels: ['Positive', 'Neutral', 'Negative'],
+    datasets: [{
+      data: [68, 22, 10],
+      backgroundColor: [TEAL, GRAY, ORANGE],
+      borderRadius: 8
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      y: { beginAtZero: true, max: 80, ticks: { callback: v => v + '%' } },
+      x: { grid: { display: false } }
+    }
+  }
+});
+
+makeChart('posThemeChart', {
+  type: 'bar',
+  data: {
+    labels: ['Comfort','Lightweight','Performance','Breathable','Support','Cushion','Durable','Stylish','Traction','Stability'],
+    datasets: [{
+      label: 'Frequency %',
+      data: [92, 85, 78, 71, 65, 58, 52, 44, 38, 33],
+      backgroundColor: [TEAL,TEAL,ORANGE,BLUE,PURPLE,GOLD,GREEN,GRAY,TEAL,ORANGE],
+      borderRadius: 4
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { beginAtZero: true, max: 100, ticks: { callback: v => v + '%' } },
+      y: { grid: { display: false } }
+    }
+  }
+});
+
+makeChart('bottomTierChart', {
+  type: 'radar',
+  data: {
+    labels: ['Rating', 'Reviews', 'Sentiment', 'Awareness', 'Success Score'],
+    datasets: [{
+      label: 'Bottom 5 Products',
+      data: [25, 15, 20, 18, 22],
+      backgroundColor: 'rgba(163,45,45,0.15)',
+      borderColor: RED,
+      pointBackgroundColor: RED
+    }, {
+      label: 'Portfolio Average',
+      data: [65, 60, 68, 55, 63],
+      backgroundColor: 'rgba(29,158,117,0.1)',
+      borderColor: TEAL,
+      pointBackgroundColor: TEAL
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    scales: { r: { beginAtZero: true, max: 100 } },
+    plugins: { legend: { display: false } }
+  }
+});
+
+makeChart('successScoreChart', {
+  type: 'bar',
+  data: {
+    labels: ['0–20','20–40','40–60','60–70','70–80','80–90','90–100'],
+    datasets: [{
+      label: 'Products',
+      data: [78, 196, 424, 680, 940, 860, 422],
+      backgroundColor: [RED, RED, GOLD, GOLD, TEAL, GREEN, GREEN],
+      borderRadius: 6
+    }]
+  },
+  options: {
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { title: { display: true, text: 'Success Score Range' }, grid: { display: false } },
+      y: { title: { display: true, text: 'Number of Products' } }
+    }
+  }
+});
+
+makeChart('driversChart', {
+  type: 'bar',
+  data: {
+    labels: ['Comfort', 'Lightweight', 'Performance', 'Breathability', 'Support', 'Cushioning', 'Brand Trust', 'Price', 'Style', 'Availability'],
+    datasets: [{
+      label: 'Influence Score',
+      data: [92, 85, 78, 71, 65, 58, 52, 30, 26, 18],
+      backgroundColor: [GREEN, GREEN, TEAL, TEAL, BLUE, BLUE, GOLD, GOLD, GRAY, GRAY],
+      borderRadius: 4
+    }]
+  },
+  options: {
+    indexAxis: 'y',
+    responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: false } },
+    scales: {
+      x: { beginAtZero: true, max: 100 },
+      y: { grid: { display: false } }
+    }
+  }
+});
+</script>
+</body>
+</html>
